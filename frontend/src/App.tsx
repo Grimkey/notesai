@@ -1,35 +1,31 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import * as React from "react";
+import { useState } from "react";
+import MarkdownEditor from "./components/MarkdownEditor";
+import ReactMarkdown from "react-markdown";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+  const [markdown, setMarkdown] = useState<string>("## Welcome to NotesAI!");
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div style={{ display: "flex", height: "100vh" }}>
+      {/* Left Panel: Navigation */}
+      <div style={{ width: "20%", background: "#2c3e50", color: "white", padding: "10px" }}>
+        <h3>📁 Notes</h3>
+        {/* TODO: Add Note Navigation */}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
 
-export default App
+      {/* Middle Panel: Markdown Editor */}
+      <div style={{ flex: 1, padding: "10px" }}>
+        <MarkdownEditor content={markdown} onChange={setMarkdown} />
+      </div>
+
+      {/* Right Panel: Markdown Preview */}
+      <div style={{ width: "30%", background: "#ecf0f1", padding: "10px", overflowY: "auto" }}>
+        <h3>📄 Preview</h3>
+        <ReactMarkdown>{markdown}</ReactMarkdown>
+      </div>
+    </div>
+  );
+};
+
+export default App;
