@@ -1,7 +1,9 @@
 import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld("electron", {
-  send: (channel: string, data: any) => ipcRenderer.send(channel, data),
-  receive: (channel: string, func: Function) =>
-    ipcRenderer.on(channel, (event, ...args) => func(...args)),
+  getNotes: () => ipcRenderer.invoke("get-notes"),
+  readNote: (filename: string) => ipcRenderer.invoke("read-note", filename),
+  saveNote: (filename: string, content: string) => ipcRenderer.invoke("save-note", filename),
+  createNote: () => ipcRenderer.invoke("create-note"),
+  deleteNote: (filename: string) => ipcRenderer.invoke("delete-note", filename),
 });

@@ -1,10 +1,31 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MarkdownEditor from "./components/MarkdownEditor";
 import ReactMarkdown from "react-markdown";
+import FileNavigator from "./components/FileNavigator";
 
 const App: React.FC = () => {
   const [markdown, setMarkdown] = useState<string>("## Welcome to NotesAI!");
+  const [currentFile, setCurrentFile] = useState<string | null>(null);
+
+  const loadFile = (filename: string) => {
+    window.electron.readNote(filename).then((content) => {
+      setCurrentFile(filename);
+      setMarkdown(content);
+    });
+  };
+
+  const saveFile = () => {
+    if (currentFile) {
+      window.electron.saveNote(currentFile, markdown);
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(saveFile, 2000); // Auto-save every 2s
+    return () => clearInterval(interval);
+  }, [markdown, currentFile]);
+
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>

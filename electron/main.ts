@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
+import fileManager from "./fileManager";
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -28,6 +29,13 @@ const createWindow = () => {
     mainWindow = null;
   });
 };
+
+// IPC handlers using fileManager
+ipcMain.handle("get-notes", async () => fileManager.getNotes());
+ipcMain.handle("read-note", async (_event, filename) => fileManager.readNote(filename));
+ipcMain.handle("save-note", async (_event, filename, content) => fileManager.saveNote(filename, content));
+ipcMain.handle("create-note", async () => fileManager.createNote());
+ipcMain.handle("delete-note", async (_event, filename) => fileManager.deleteNote(filename));
 
 app.whenReady().then(() => {
   createWindow();
