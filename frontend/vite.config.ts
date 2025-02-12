@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react()],
   base: "./",
   build: {
-    outDir: path.resolve(__dirname, "../dist/frontend"), // Ensures frontend build goes inside dist
-    emptyOutDir: true, // Clears previous builds
+    outDir: path.resolve(__dirname, "../dist/frontend"), // ✅ Ensures frontend build goes inside dist
+    emptyOutDir: true, // ✅ Clears previous builds
   }
 });

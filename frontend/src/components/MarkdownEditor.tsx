@@ -1,16 +1,19 @@
-import * as React from "react";
-import { useState, useEffect } from "react";import SimpleMDE from "react-simplemde-editor";
-import "easymde/dist/easymde.min.css";
+import React from "react";
 
 interface MarkdownEditorProps {
   content: string;
-  onChange: (content: string) => void;
+  onChange: (newContent: string) => void;
 }
 
-const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ content, onChange }: MarkdownEditorProps) => {
+const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ content, onChange }) => {
   return (
-    <div className="editor-container">
-      <SimpleMDE value={content} onChange={onChange} />
+    <div className="flex flex-col flex-grow p-4 bg-gray-800 text-white">
+      <textarea
+        className="w-full h-full bg-gray-900 text-white text-lg leading-relaxed p-4 border border-gray-700 rounded-md outline-none focus:ring-2 focus:ring-green-400 transition"
+        value={content}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Write your note in Markdown..."
+      />
     </div>
   );
 };

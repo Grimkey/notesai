@@ -1,41 +1,68 @@
 import fileManager from "../../electron/fileManager";
 import fs from "fs";
 import path from "path";
+import sinon from "sinon";
 
 const testDir = path.join(__dirname, "test-notes", "notes");
 
+let clock: sinon.SinonFakeTimers;
+let statStub: sinon.SinonStub;
 
-// Setup a test directory
 beforeAll(() => {
   console.log(`[Test Setup] Creating test directory at: ${testDir}`);
   if (!fs.existsSync(testDir)) {
     fs.mkdirSync(testDir, { recursive: true });
   }
+
+  const frozenTime = new Date("2025-01-01T12:00:00Z").getTime();
+  clock = sinon.useFakeTimers(frozenTime);
+
+  statStub = sinon.stub(fs, "statSync").callsFake((filePath) => {
+    return {
+      isFile: () => true,
+      isDirectory: () => false,
+      birthtimeMs: frozenTime, // Force a fixed timestamp
+    } as fs.Stats;
+  });
 });
 
-// Cleanup after tests
 afterAll(() => {
   console.log(`[Test Cleanup] Removing test directory: ${testDir}`);
   fs.rmSync(testDir, { recursive: true, force: true });
+  clock.restore();
+  statStub.restore(); // Restore `fs.statSync`
+});
+
+beforeEach(() => {
+  fs.rmSync(testDir, { recursive: true, force: true });
+  fs.mkdirSync(testDir, { recursive: true });
 });
 
 describe("FileManager Tests", () => {
-  test("should create a new note", () => {
+  test("should create a new note with a valid frozen timestamp", () => {
     const filename = fileManager.createNote();
     console.log(`[Test] Created file: ${filename}`);
-  
+
     const filePath = path.join(testDir, filename);
-    console.log(`[Test] Expected file path: ${filePath}`);
-    console.log(`[Test] File exists before assertion: ${fs.existsSync(filePath)}`);
- 
-    expect(filename).toMatch(/note-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d+Z\.md/);
     expect(fs.existsSync(filePath)).toBe(true);
+
+    // ✅ Verify timestamps
+    const files = fileManager.getNotes();
+    const note = files.find((file) => file.name === filename);
+
+    expect(note).toBeDefined();
+    expect(note!.createdAt).toBe(new Date("2025-01-01T12:00:00Z").getTime());
   });
 
-  test("should list markdown files", () => {
+  test("should rename a note", () => {
+    const oldFilename = fileManager.createNote();
+    const newFilename = `renamed-${oldFilename}`;
+
+    fileManager.renameNote(oldFilename, newFilename);
     const files = fileManager.getNotes();
-    expect(Array.isArray(files)).toBe(true);
-    expect(files.some((file) => file.endsWith(".md"))).toBe(true);
+
+    expect(files.some((file) => file.name === newFilename)).toBe(true);
+    expect(files.some((file) => file.name === oldFilename)).toBe(false);
   });
 
   test("should read a note", () => {

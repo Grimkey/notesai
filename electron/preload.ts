@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld("electron", {
   saveNote: (filename: string, content: string) => ipcRenderer.invoke("save-note", filename),
   createNote: () => ipcRenderer.invoke("create-note"),
   deleteNote: (filename: string) => ipcRenderer.invoke("delete-note", filename),
+  renameNote: (oldName: string, newName: string) => ipcRenderer.invoke("rename-note", oldName, newName),
 });

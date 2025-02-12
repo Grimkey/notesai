@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import MarkdownEditor from "./components/MarkdownEditor";
 import ReactMarkdown from "react-markdown";
 import FileNavigator from "./components/FileNavigator";
+import ChatPanel from "./components/ChatPanel";
 
 const App: React.FC = () => {
   const [markdown, setMarkdown] = useState<string>("## Welcome to NotesAI!");
@@ -26,24 +27,37 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [markdown, currentFile]);
 
-
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
+    <div className="flex h-screen">
       {/* Left Panel: Navigation */}
-      <div style={{ width: "20%", background: "#2c3e50", color: "white", padding: "10px" }}>
-        <h3>📁 Notes</h3>
-        {/* TODO: Add Note Navigation */}
+      <div className="w-1/5 bg-gray-900 text-white p-4">
+        <h3 className="text-lg font-semibold mb-4">📁 Notes</h3>
+        <FileNavigator onSelectFile={loadFile} />
       </div>
 
       {/* Middle Panel: Markdown Editor */}
-      <div style={{ flex: 1, padding: "10px" }}>
+      <div className="flex flex-col flex-grow bg-gray-800 text-white">
+        <div className="p-2 bg-gray-900 text-center font-bold">
+          {currentFile ? `Editing: ${currentFile}` : "No file selected"}
+        </div>
         <MarkdownEditor content={markdown} onChange={setMarkdown} />
+        <button
+          onClick={saveFile}
+          className="m-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+        >
+          Save Note
+        </button>
       </div>
 
-      {/* Right Panel: Markdown Preview */}
-      <div style={{ width: "30%", background: "#ecf0f1", padding: "10px", overflowY: "auto" }}>
-        <h3>📄 Preview</h3>
-        <ReactMarkdown>{markdown}</ReactMarkdown>
+      {/* Right Panel: Markdown Preview & Chat */}
+      <div className="w-1/3 flex flex-col">
+        <div className="bg-gray-100 p-4 overflow-y-auto h-1/2">
+          <h3 className="text-lg font-semibold">📄 Preview</h3>
+          <ReactMarkdown className="prose">{markdown}</ReactMarkdown>
+        </div>
+        <div className="h-1/2">
+          <ChatPanel />
+        </div>
       </div>
     </div>
   );

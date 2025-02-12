@@ -1,12 +1,19 @@
-import * as React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+
+interface FileMetadata {
+  name: string;
+  createdAt: number;
+}
 
 interface FileNavigatorProps {
   onSelectFile: (filename: string) => void;
 }
 
-const FileNavigator: React.FC<FileNavigatorProps> = ({ onSelectFile }: FileNavigatorProps) => {
-  const [files, setFiles] = useState<string[]>([]);
+const FileNavigator: React.FC<FileNavigatorProps> = ({ onSelectFile }) => {
+  const [files, setFiles] = useState<FileMetadata[]>([]);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [editingFile, setEditingFile] = useState<string | null>(null);
+  const [newFileName, setNewFileName] = useState<string>("");
 
   const refreshFiles = () => {
     window.electron.getNotes().then(setFiles);
@@ -16,29 +23,30 @@ const FileNavigator: React.FC<FileNavigatorProps> = ({ onSelectFile }: FileNavig
     refreshFiles();
   }, []);
 
-  const handleCreateNote = async () => {
-    const newNote = await window.electron.createNote();
-    refreshFiles();
-    onSelectFile(newNote);
-  };
-
-  const handleDeleteNote = async (filename: string, event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent triggering file selection
-    await window.electron.deleteNote(filename);
-    refreshFiles();
+  const handleSelectFile = (filename: string) => {
+    setSelectedFile(filename);
+    onSelectFile(filename);
   };
 
   return (
-    <div style={{ padding: "10px", background: "#2c3e50", color: "white", height: "100vh" }}>
-      <h3>📁 Notes</h3>
-      <button onClick={handleCreateNote} style={{ marginBottom: "10px", padding: "5px 10px" }}>
+    <div className="bg-gray-900 text-white p-4 h-full w-60 border-r border-gray-700">
+      <h3 className="text-lg font-semibold mb-4">📁 Notes</h3>
+      <button
+        onClick={() => window.electron.createNote().then(refreshFiles)}
+        className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-4 transition"
+      >
         ➕ New Note
       </button>
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {files.map((file) => (
-          <li key={file} onClick={() => onSelectFile(file)} style={{ cursor: "pointer", marginBottom: "8px" }}>
-            📄 {file} 
-            <button onClick={(e) => handleDeleteNote(file, e)} style={{ marginLeft: "10px" }}>🗑</button>
+      <ul className="space-y-2">
+        {files.map(({ name, createdAt }) => (
+          <li
+            key={name}
+            onClick={() => handleSelectFile(name)}
+            className={`cursor-pointer px-3 py-2 rounded-md ${
+              selectedFile === name ? "bg-green-500" : "hover:bg-gray-700"
+            } transition`}
+          >
+            📄 {name} <span className="text-xs text-gray-400">({new Date(createdAt).toLocaleString()})</span>
           </li>
         ))}
       </ul>
